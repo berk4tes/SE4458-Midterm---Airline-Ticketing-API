@@ -50,7 +50,7 @@ async function addFlightsBatch(flightDtos) {
  * Returns false if limit exceeded, true if allowed.
  */
 async function checkQueryRateLimit(identifier) {
-  if (process.env.DISABLE_RATE_LIMIT === 'true') return true;
+
   const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
 
   const existing = await db.query(

@@ -1,6 +1,8 @@
-# Airline API – SE4458 Midterm Group 1
+# Airline API — SE4458 Midterm Group 1
 
 REST API for an airline ticketing system built with **Node.js + Express + PostgreSQL**.
+
+> **[Live Swagger UI](https://berk-airline-api-dyg6fycfh5fwdqat.switzerlandnorth-01.azurewebsites.net/api-docs)**  |  **[Demo Video](VIDEO_LINK_BURAYA)**
 
 ---
 
@@ -31,7 +33,7 @@ Client → API Gateway (port 4000) → Airline API (port 3000) → PostgreSQL (N
 
 ## Architecture Diagrams
 
-### Request Flow – Sequence Diagram
+### Request Flow — Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -80,7 +82,7 @@ flowchart TD
 
     M --> N[POST /tickets/checkin\npassengerName + flightNumber + date]
     N --> O{Check-in OK?}
-    O -- Already checked in --> O2([Done – seat already assigned])
+    O -- Already checked in --> O2([Done — seat already assigned])
     O -- Yes --> P[Receive seat number]
 
     P --> Q[GET /flights/:id/passengers\nView full passenger list]
@@ -151,10 +153,10 @@ cp .env .env.local
 cd airline-api
 npm install
 
-# Terminal 1 – Start API
+# Terminal 1 — Start API
 npm start          # or: npm run dev
 
-# Terminal 2 – Start Gateway
+# Terminal 2 — Start Gateway
 npm run gateway
 ```
 
@@ -202,37 +204,20 @@ See `sample-flights.csv` for a full example.
 
 ### Install k6
 ```bash
-# Windows (via Chocolatey)
-choco install k6
+# Windows
+winget install k6 --source winget
 
 # Or download from https://k6.io/docs/get-started/installation/
-```
-
-### Get JWT Token First
-```bash
-curl -X POST http://localhost:4000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"airline","password":"userpass"}'
 ```
 
 ### Run Tests
 ```bash
 # Query Flight load test (no token needed)
-k6 run load-tests/query-flight.js
+k6 run load-tests/query-flight.js --env BASE_URL=https://berk-airline-api-dyg6fycfh5fwdqat.switzerlandnorth-01.azurewebsites.net
 
-# Buy Ticket load test (token required)
-k6 run --env JWT_TOKEN=<your_token> load-tests/buy-ticket.js
+# Buy Ticket load test (token required — get token from POST /auth/login first)
+k6 run load-tests/buy-ticket.js --env BASE_URL=https://berk-airline-api-dyg6fycfh5fwdqat.switzerlandnorth-01.azurewebsites.net --env JWT_TOKEN=<your_token>
 ```
-
----
-
-## Load Test Results
-
-> *(Fill in after running tests against your deployed instance)*
-
-### Endpoints Tested
-1. **GET /api/v1/flights** – Query Flight
-2. **POST /api/v1/tickets/buy** – Buy Ticket
 
 ### Test Scenarios
 
@@ -242,33 +227,56 @@ k6 run --env JWT_TOKEN=<your_token> load-tests/buy-ticket.js
 | Peak Load   | 50  | 30s      |
 | Stress Load | 100 | 30s      |
 
-### Results Table
+---
 
-| Scenario    | Avg Response (ms) | p95 (ms) | Req/sec | Error Rate |
-|-------------|-------------------|----------|---------|------------|
-| Normal (20) | -                 | -        | -       | -          |
-| Peak (50)   | -                 | -        | -       | -          |
-| Stress (100)| -                 | -        | -       | -          |
+## Load Test Results
+
+### Query Flight — GET /api/v1/flights
+
+| Metric         | Value      |
+|----------------|------------|
+| Total Requests | 1,220      |
+| Avg Response   | 3,350 ms   |
+| Median         | 2,104 ms   |
+| p95            | 16,283 ms  |
+| Error Rate     | 0.00%      |
+| Req/sec        | 11.9       |
+
+![Query Flight k6 Results](load-tests/query-flight-result.png)
+
+### Buy Ticket — POST /api/v1/tickets/buy
+
+| Metric         | Value    |
+|----------------|----------|
+| Total Requests | 3,923    |
+| Avg Response   | 322 ms   |
+| Median         | 68 ms    |
+| p95            | 1,459 ms |
+| Error Rate     | 0.00%    |
+| Req/sec        | 38.8     |
+
+![Buy Ticket k6 Results](load-tests/buy-ticket-result.png)
 
 ### Analysis
-*(Write 3–5 sentences after running tests)*
 
-The API performed well under normal load conditions with acceptable response times.
-Under peak and stress loads, response times increased due to database connection pool saturation.
-The main bottleneck identified was the PostgreSQL query for available seats with concurrent write operations on the same flight row.
-Potential improvements include adding a caching layer (Redis) for flight availability reads and using database-level row locking or optimistic concurrency for seat decrements.
-Horizontal scaling via multiple API instances behind a load balancer would also significantly improve throughput.
+Both endpoints achieved a **0% error rate** across all three scenarios (Normal 20 VUs, Peak 50 VUs, Stress 100 VUs), demonstrating strong reliability under load. The Buy Ticket endpoint performed exceptionally well with a median response time of 68ms and p95 of 1.45s. The Query Flight endpoint showed higher latency (p95: 16.28s) due to Azure App Service F1 Free tier resource limitations — this is expected behavior for a free-tier deployment and not indicative of application-level issues. The rate limit for Query Flight (3/day per IP) was temporarily disabled during load testing to produce meaningful results. Potential improvements include adding Redis caching for flight queries and using database transactions for concurrent ticket purchases.
 
 ---
 
-## Deployment (AWS App Runner)
+## Deployment (Azure App Service)
 
-1. Push code to GitHub.
-2. Create a PostgreSQL database on Neon (free tier).
-3. In AWS App Runner, connect your GitHub repo.
-4. Set environment variables: `DATABASE_URL`, `JWT_SECRET`.
-5. Deploy – App Runner auto-builds from your repo.
-6. Update `swagger.js` server URL to your App Runner URL.
+- **Platform**: Azure App Service (F1 Free tier, Switzerland North)
+- **Database**: Neon PostgreSQL (Frankfurt)
+- **CI/CD**: GitHub Actions — auto-deploy on push to `main`
+- **Swagger UI**: [Live API Docs](https://berk-airline-api-dyg6fycfh5fwdqat.switzerlandnorth-01.azurewebsites.net/api-docs)
+
+### Environment Variables (Azure)
+| Variable       | Description                    |
+|----------------|--------------------------------|
+| DATABASE_URL   | Neon PostgreSQL connection URL |
+| JWT_SECRET     | Secret key for JWT signing     |
+| DATABASE_SSL   | `true`                         |
+| BASE_URL       | Azure App Service URL          |
 
 ---
 

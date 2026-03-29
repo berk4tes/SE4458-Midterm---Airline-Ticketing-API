@@ -53,18 +53,9 @@ const responseTime = new Trend('query_flight_response_time');
 const errorRate    = new Rate('query_flight_errors');
 
 export default function () {
-  const params = new URLSearchParams({
-    dateFrom:       '2026-05-01',
-    dateTo:         '2026-05-20',
-    airportFrom:    'IST',
-    airportTo:      'LHR',
-    numberOfPeople: '1',
-    oneWay:         'true',
-    page:           '1',
-    limit:          '10',
-  });
-
-  const res = http.get(`${BASE_URL}/api/v1/flights?${params}`);
+  const res = http.get(
+    `${BASE_URL}/api/v1/flights?dateFrom=2026-05-01&dateTo=2026-05-20&airportFrom=IST&airportTo=LHR&numberOfPeople=1&oneWay=true&page=1&limit=10`
+  );
 
   const success = check(res, {
     'status is 200 or 429': (r) => r.status === 200 || r.status === 429,
