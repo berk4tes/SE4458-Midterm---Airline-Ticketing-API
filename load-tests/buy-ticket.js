@@ -5,7 +5,7 @@
  * Run:  k6 run load-tests/buy-ticket.js
  *
  * Prerequisites:
- *   1. Have a flight added (e.g., flight_number=TK101, date=2025-06-15, large capacity)
+ *   1. Have a flight added (e.g., flight_number=TK101, date=2026-05-01, large capacity)
  *   2. Have a valid JWT token (get from /api/v1/auth/login)
  *
  * Example:
@@ -60,7 +60,7 @@ export default function () {
 
   const payload = JSON.stringify({
     flightNumber:   'TK101',
-    date:           '2025-06-15',
+    date:           '2026-05-01',
     passengerNames: [passengerName],
   });
 

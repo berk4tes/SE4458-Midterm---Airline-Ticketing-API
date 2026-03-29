@@ -54,8 +54,8 @@ const errorRate    = new Rate('query_flight_errors');
 
 export default function () {
   const params = new URLSearchParams({
-    dateFrom:       '2025-06-01',
-    dateTo:         '2025-12-31',
+    dateFrom:       '2026-05-01',
+    dateTo:         '2026-05-20',
     airportFrom:    'IST',
     airportTo:      'LHR',
     numberOfPeople: '1',
