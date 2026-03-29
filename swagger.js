@@ -19,7 +19,7 @@ const options = {
         '**Note:** 10 seed flights are auto-loaded on startup — no need to add flights manually.',
     },
     servers: [
-      { url: 'http://localhost:3000', description: 'Local development' },
+      { url: process.env.BASE_URL || 'http://localhost:3000', description: 'Local development' },
     ],
     components: {
       securitySchemes: {
