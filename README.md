@@ -2,7 +2,7 @@
 
 REST API for an airline ticketing system built with **Node.js + Express + PostgreSQL**.
 
-> **[Live Swagger UI](https://berk-airline-api-dyg6fycfh5fwdqat.switzerlandnorth-01.azurewebsites.net/api-docs)**  |  **[Demo Video](VIDEO_LINK_BURAYA)**
+> **[Live Swagger UI](https://berk-airline-api-dyg6fycfh5fwdqat.switzerlandnorth-01.azurewebsites.net/api-docs)**  |  **[Demo Video](https://drive.google.com/file/d/1Z4SiHDEk00jC5cdtC_JjXjI5Iean5qGA/view?usp=sharing)**
 
 ---
 
